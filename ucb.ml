@@ -37,11 +37,16 @@ class ucb (bandit : bandit) =
     let m, c = means.(arm), float counts.(arm) in
     means.(arm) <- m -. m /. c +. reward /. c;
 
-  method pull () =
-    let arm = self#select_arm () in
-    let reward = bandit#pull arm in
-    self#update_stats arm reward;
-    bandit#regret ()
+  method pull ?(ntimes=1) () =
+    let rec aux ntimes =
+      match ntimes with
+      | 0 -> bandit#regret()
+      | _ ->
+        let arm = self#select_arm () in
+        let reward = bandit#pull arm in
+        self#update_stats arm reward;
+        aux (ntimes - 1)
+    in aux ntimes
 
   method regret_bound ?(npulls=step_count) means =
     let max_mean = Array.fold_left max neg_infinity means in
