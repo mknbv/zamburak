@@ -43,4 +43,14 @@ class ucb (bandit : bandit) =
     self#update_stats arm reward;
     bandit#regret ()
 
+  method regret_bound ?(npulls=step_count) means =
+    let max_mean = Array.fold_left max neg_infinity means in
+    let action_regret mean =
+      match mean = max_mean with
+      | true -> 0.
+      | false ->
+      let action_gap = max_mean -. mean in
+      action_gap +. log (float npulls) /. action_gap
+    in means |> Array.map action_regret |> Array.fold_left (+.) 0.
+
   end
