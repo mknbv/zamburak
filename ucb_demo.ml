@@ -2,6 +2,34 @@ open Matplotlib
 open Bandit
 open Ucb
 
+module Array = struct
+  include Array
+  let float_mean arr =
+    let rec aux idx mean =
+      match idx < Array.length arr with
+      | false -> mean
+      | true ->
+          let count = float idx +. 1. in
+          let mean = mean -. mean /. count +. arr.(idx) /. count in
+          aux (idx + 1) mean
+    in aux 0 0.
+
+  let float_std ?mean arr =
+    let mean = match mean with
+    | None -> float_mean arr
+    | Some mean -> mean
+    in
+    let rec aux idx std =
+      match idx < Array.length arr with
+      | false -> std
+      | true ->
+          let count = float idx +. 1. in
+          let std = std -. std /. count
+                    +. (arr.(idx) -. mean) ** 2. /. count
+          in aux (idx + 1) std
+    in let n = float @@ Array.length arr in
+    sqrt (n /. (n -. 1.) *. (aux 0 0.))
+end
 
 let () =
   let means = [|0.; 0.2; -0.3; 0.1; 0.25|] in
@@ -13,29 +41,8 @@ let () =
   let regrets = Array.init npoints (fun _ ->
     Array.init batch_size (fun i -> ucbs.(i)#pull ~ntimes:step ())
   ) in
-  let regret_means = Array.map (fun regrets ->
-    let rec aux idx mean =
-      match idx < Array.length regrets with
-      | false -> mean
-      | true ->
-          let count = float idx +. 1. in
-          let mean = mean -. mean /. count +. regrets.(idx) /. count in
-          aux (idx + 1) mean
-    in aux 0 0.
-  ) regrets in
-  let regret_stds = Array.mapi (fun i regrets ->
-    let rec aux idx std =
-      match idx < Array.length regrets with
-      | false -> std
-      | true ->
-          let count = float idx +. 1. in
-          let std = std -. std /. count
-                    +. (regrets.(idx) -. regret_means.(i)) ** 2. /. count
-          in aux (idx + 1) std
-    in
-    let n = float @@ Array.length regrets in
-    sqrt (n /. (n -. 1.) *. (aux 0 0.))
-  ) regrets in
+  let regret_means = Array.map Array.float_mean regrets in
+  let regret_stds = Array.map Array.float_std regrets in
 
   Pyplot.grid true;
   Pyplot.xlabel "$n$";
