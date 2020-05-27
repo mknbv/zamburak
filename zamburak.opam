@@ -1,0 +1,13 @@
+opam-version: "2.0"
+name: "zamburak"
+version: "~dev"
+synopsis: "Bandit algorithms"
+maintainer: "MichaelKonobeev <konobeev.michael@gmail.com>"
+authors: "MichaelKonobeev <konobeev.michael@gmail.com>"
+license: "MIT"
+homepage: "https://github.com/MichaelKonobeev/zamburak"
+bug-reports: "https://github.com/MichaelKonobeev/zamburak/issues"
+depends: [
+  "matplotlib" {>= "dev"}
+]
+build: ["dune" "build" "-p" name "-j" jobs]

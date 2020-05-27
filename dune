@@ -1,0 +1,9 @@
+(executable
+ (name ucb_demo)
+ (libraries zamburak matplotlib)
+ (modules ucb_demo))
+
+(library
+ (name zamburak)
+ (public_name zamburak)
+ (modules zamburak))

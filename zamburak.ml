@@ -8,7 +8,7 @@ let random_normal () =
 class bandit means stds =
   let () = assert (Array.length means = Array.length stds) in
   let () = assert (Array.length means > 0) in
-  object (self)
+  object
     val mutable total_reward = 0.
     val mutable npulls = 0
     val max_mean = Array.fold_left max neg_infinity means
