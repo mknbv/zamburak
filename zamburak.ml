@@ -5,6 +5,8 @@ let random_normal () =
 
 class virtual bandit =
   object
+    val mutable total_reward = 0.
+
     method virtual narms : int
 
     method virtual pull : int -> float
@@ -17,8 +19,6 @@ class gaussian_bandit means stds =
   let () = assert (Array.length means > 0) in
   object
     inherit bandit
-
-    val mutable total_reward = 0.
 
     val mutable npulls = 0
 
@@ -44,8 +44,10 @@ let argmax nums =
   let idx = Array.length nums - 1 in
   aux idx idx
 
-class virtual bandit_alg =
+class virtual bandit_alg (bandit : bandit) =
   object
+    method narms = bandit#narms
+
     method virtual select_arm : int
 
     method virtual update_stats : int -> float -> unit
@@ -54,18 +56,17 @@ class virtual bandit_alg =
   end
 
 class ucb (bandit : bandit) =
-  let narms = bandit#narms in
   object (self)
-    inherit bandit_alg
+    inherit bandit_alg bandit
 
     val mutable step_count = 0
 
-    val mutable means = Array.make narms 0.
+    val mutable means = Array.make bandit#narms 0.
 
-    val mutable counts = Array.make narms 0
+    val mutable counts = Array.make bandit#narms 0
 
     method select_arm =
-      match step_count < narms with
+      match step_count < self#narms with
       | true -> step_count
       | false -> (
           let t = float step_count +. 1. in
@@ -73,7 +74,7 @@ class ucb (bandit : bandit) =
           let arm_index arm =
             let m, c = (means.(arm), float counts.(arm)) in
             m +. sqrt (2. *. log time_bonus /. c) in
-          match Array.init narms arm_index |> argmax with
+          match Array.init self#narms arm_index |> argmax with
           | None -> -1 (* Shouldn't happen since narms > 0 and argmax code *)
           | Some arm -> arm )
 
@@ -103,4 +104,31 @@ class ucb (bandit : bandit) =
             let action_gap = max_mean -. mean in
             action_gap +. (log (float npulls) /. action_gap) in
       means |> Array.map action_regret |> Array.fold_left ( +. ) 0.
+  end
+
+class adversarial_bandit (alg : bandit_alg) =
+  object
+    inherit bandit
+
+    val mutable summed_rewards = Array.make alg#narms 0.
+
+    method narms = alg#narms
+
+    method pull arm =
+      let worst_arm = alg#select_arm in
+      let rewards =
+        Array.init alg#narms (fun arm -> Bool.to_float (arm <> worst_arm)) in
+      alg#update_stats worst_arm rewards.(worst_arm) ;
+      let rec update_summed_rewards idx =
+        match idx < Array.length summed_rewards with
+        | false -> ()
+        | true ->
+            summed_rewards.(idx) <- summed_rewards.(idx) +. rewards.(idx) ;
+            update_summed_rewards (idx + 1) in
+      update_summed_rewards 0 ;
+      total_reward <- total_reward +. rewards.(arm) ;
+      rewards.(arm)
+
+    method regret =
+      Array.fold_left max neg_infinity summed_rewards -. total_reward
   end
