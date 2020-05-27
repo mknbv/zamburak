@@ -5,21 +5,29 @@ let random_normal () =
   *.  cos (2. *. Float.pi *. Random.float 1.)
 
 
-class bandit means stds =
+class virtual bandit =
+  object
+    method virtual narms : int
+    method virtual pull : int -> float
+    method virtual regret : float
+  end
+
+class gaussian_bandit means stds =
   let () = assert (Array.length means = Array.length stds) in
   let () = assert (Array.length means > 0) in
   object
+    inherit bandit
     val mutable total_reward = 0.
     val mutable npulls = 0
     val max_mean = Array.fold_left max neg_infinity means
 
-    method narms () = Array.length means
+    method narms = Array.length means
     method pull arm =
       let reward = means.(arm) +. stds.(arm) *. random_normal () in
       total_reward <- total_reward +. reward;
       npulls <- npulls + 1;
       reward
-    method regret () = float npulls *. max_mean -. total_reward
+    method regret = float npulls *. max_mean -. total_reward
   end
 
 let argmax nums =
@@ -32,13 +40,13 @@ let argmax nums =
   in aux idx idx
 
 class ucb (bandit : bandit) =
-  let narms = bandit#narms () in
+  let narms = bandit#narms in
   object (self)
     val mutable step_count = 0
     val mutable means = Array.make narms 0.
     val mutable counts = Array.make narms 0
 
-  method select_arm () =
+  method select_arm =
     match step_count < narms with
     | true -> step_count
     | false ->
@@ -60,9 +68,9 @@ class ucb (bandit : bandit) =
   method pull ?(ntimes=1) () =
     let rec aux ntimes =
       match ntimes with
-      | 0 -> bandit#regret()
+      | 0 -> bandit#regret
       | _ ->
-        let arm = self#select_arm () in
+        let arm = self#select_arm in
         let reward = bandit#pull arm in
         self#update_stats arm reward;
         aux (ntimes - 1)

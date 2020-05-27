@@ -34,7 +34,8 @@ let () =
   let means = [|0.; 0.2; -0.3; 0.1; 0.25|] in
   let batch_size, npoints, step = 100, 201, 10 in
   let stds = Array.make (Array.length means) 1. in
-  let bandits = Array.init batch_size (fun _ -> new bandit means stds) in
+  let bandits = Array.init batch_size (
+    fun _ -> new gaussian_bandit means stds) in
   let ucbs = Array.init batch_size (fun i -> new ucb bandits.(i)) in
   let xs = Array.init npoints (fun i -> float step *. float i) in
   let regrets = Array.init npoints (fun _ ->
