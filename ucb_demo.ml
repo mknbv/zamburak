@@ -1,6 +1,5 @@
-open Matplotlib
 open Bandit
-open Ucb
+open Matplotlib
 
 module Array = struct
   include Array
