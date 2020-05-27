@@ -17,6 +17,13 @@ class gaussian_bandit :
     method regret : float
   end
 
+class virtual bandit_alg :
+  object
+    method virtual select_arm : int
+    method virtual update_stats : int -> float -> unit
+    method virtual pull : ?ntimes:int -> unit -> float
+  end
+
 class ucb :
   bandit ->
   object

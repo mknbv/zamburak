@@ -30,6 +30,7 @@ class gaussian_bandit means stds =
     method regret = float npulls *. max_mean -. total_reward
   end
 
+
 let argmax nums =
   let rec aux idx idx_max =
     match idx with
@@ -39,9 +40,18 @@ let argmax nums =
   in let idx = Array.length nums - 1
   in aux idx idx
 
+
+class virtual bandit_alg =
+  object
+    method virtual select_arm : int
+    method virtual update_stats : int -> float -> unit
+    method virtual pull : ?ntimes:int -> unit -> float
+  end
+
 class ucb (bandit : bandit) =
   let narms = bandit#narms in
   object (self)
+    inherit bandit_alg
     val mutable step_count = 0
     val mutable means = Array.make narms 0.
     val mutable counts = Array.make narms 0
