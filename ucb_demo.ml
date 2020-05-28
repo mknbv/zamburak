@@ -1,4 +1,4 @@
-open Bandits
+open Zamburak
 open Matplotlib
 
 module Array = struct
