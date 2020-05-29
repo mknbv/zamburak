@@ -11,3 +11,24 @@ let argmax nums =
   in
   let idx = Array.length nums - 1 in
   aux idx idx
+
+module Array = struct
+  include Array
+
+  let accumulate f arr =
+    let accum = Array.init (Array.length arr) (fun _ -> arr.(0)) in
+    let rec aux idx =
+      match idx < Array.length arr with
+      | false -> ()
+      | true ->
+          accum.(idx) <- f accum.(idx - 1) arr.(idx) ;
+          aux (idx + 1) in
+    aux 1 ; accum
+end
+
+let random_categorical probs =
+  let csums = Array.accumulate ( +. ) probs in
+  let () = assert (Float.equal csums.(Array.length csums - 1) 1.) in
+  let sample = Random.float 1. in
+  let rec aux idx = if sample <= csums.(idx) then idx else aux (idx + 1) in
+  aux 0
