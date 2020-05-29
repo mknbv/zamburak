@@ -69,14 +69,13 @@ class adversarial_bandit :
      end
 
 class exp3 :
-  bandit
-  -> float
+  ?horizon:int
+  -> ?learning_rate:float
+  -> bandit
   -> object
        inherit bandit_alg
 
        val mutable rewards : float array
-
-       val mutable learning_rate : float
 
        val mutable pulled_arm_prob : float
 

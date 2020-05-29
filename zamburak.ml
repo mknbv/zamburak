@@ -117,13 +117,22 @@ class adversarial_bandit (alg : bandit_alg) =
       Array.fold_left max neg_infinity summed_rewards -. total_reward
   end
 
-class exp3 (bandit : adversarial_bandit) learning_rate =
+class exp3 ?horizon ?learning_rate (bandit : adversarial_bandit) =
+  let process_args () =
+    match (horizon, learning_rate) with
+    | None, None | Some _, Some _ ->
+        raise
+          (Failure "exactly one of horizon and learning_rate must be specified")
+    | None, Some learning_rate -> learning_rate
+    | Some horizon, None ->
+        let narms = float bandit#narms in
+        let horizon = float horizon in
+        sqrt (2. *. log narms /. (narms *. horizon)) in
+  let learning_rate = process_args () in
   object
     inherit bandit_alg bandit
 
     val mutable rewards = Array.make bandit#narms 0.
-
-    val mutable learning_rate = learning_rate
 
     val mutable pulled_arm_prob = 1. /. float bandit#narms
 
