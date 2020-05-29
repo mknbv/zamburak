@@ -1,4 +1,5 @@
 open Utils
+module Utils = Utils
 
 class virtual bandit =
   object

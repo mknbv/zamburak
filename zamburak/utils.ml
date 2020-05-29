@@ -15,6 +15,30 @@ let argmax nums =
 module Array = struct
   include Array
 
+  let float_mean arr =
+    let rec aux idx mean =
+      match idx < Array.length arr with
+      | false -> mean
+      | true ->
+          let count = float idx +. 1. in
+          let mean = mean -. (mean /. count) +. (arr.(idx) /. count) in
+          aux (idx + 1) mean in
+    aux 0 0.
+
+  let float_std ?mean arr =
+    let mean = match mean with None -> float_mean arr | Some mean -> mean in
+    let rec aux idx std =
+      match idx < Array.length arr with
+      | false -> std
+      | true ->
+          let count = float idx +. 1. in
+          let std =
+            std -. (std /. count) +. (((arr.(idx) -. mean) ** 2.) /. count)
+          in
+          aux (idx + 1) std in
+    let n = float @@ Array.length arr in
+    sqrt (n /. (n -. 1.) *. aux 0 0.)
+
   let accumulate f arr =
     let accum = Array.init (Array.length arr) (fun _ -> arr.(0)) in
     let rec aux idx =

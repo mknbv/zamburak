@@ -1,3 +1,4 @@
 (library
  (name zamburak)
- (public_name zamburak))
+ (public_name zamburak)
+ (modules zamburak utils))

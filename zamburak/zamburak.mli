@@ -1,3 +1,5 @@
+module Utils = Utils
+
 class virtual bandit :
   object
     val mutable total_reward : float
