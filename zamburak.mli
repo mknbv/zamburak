@@ -35,21 +35,19 @@ class virtual bandit_alg :
 
        method virtual update_stats : int -> float -> unit
 
-       method virtual pull : ?ntimes:int -> unit -> float
+       method pull : ?ntimes:int -> unit -> float
      end
 
 class ucb :
   bandit
   -> object
+       inherit bandit_alg
+
        val mutable counts : int array
 
        val mutable means : float array
 
        val mutable step_count : int
-
-       method narms : int
-
-       method pull : ?ntimes:int -> unit -> float
 
        method regret_bound : ?npulls:int -> float array -> float
 
@@ -68,4 +66,21 @@ class adversarial_bandit :
        method pull : int -> float
 
        method regret : float
+     end
+
+class exp3 :
+  bandit
+  -> float
+  -> object
+       inherit bandit_alg
+
+       val mutable rewards : float array
+
+       val mutable learning_rate : float
+
+       val mutable pulled_arm_prob : float
+
+       method select_arm : int
+
+       method update_stats : int -> float -> unit
      end

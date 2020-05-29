@@ -33,14 +33,23 @@ class gaussian_bandit means stds =
   end
 
 class virtual bandit_alg (bandit : bandit) =
-  object
+  object (self)
     method narms = bandit#narms
 
     method virtual select_arm : int
 
     method virtual update_stats : int -> float -> unit
 
-    method virtual pull : ?ntimes:int -> unit -> float
+    method pull ?(ntimes = 1) () =
+      let rec aux ntimes =
+        match ntimes with
+        | 0 -> bandit#regret
+        | _ ->
+            let arm = self#select_arm in
+            let reward = bandit#pull arm in
+            self#update_stats arm reward ;
+            aux (ntimes - 1) in
+      aux ntimes
   end
 
 class ucb (bandit : bandit) =
@@ -71,17 +80,6 @@ class ucb (bandit : bandit) =
       counts.(arm) <- counts.(arm) + 1 ;
       let m, c = (means.(arm), float counts.(arm)) in
       means.(arm) <- m -. (m /. c) +. (reward /. c)
-
-    method pull ?(ntimes = 1) () =
-      let rec aux ntimes =
-        match ntimes with
-        | 0 -> bandit#regret
-        | _ ->
-            let arm = self#select_arm in
-            let reward = bandit#pull arm in
-            self#update_stats arm reward ;
-            aux (ntimes - 1) in
-      aux ntimes
 
     method regret_bound ?(npulls = step_count) means =
       let max_mean = Array.fold_left max neg_infinity means in
@@ -119,4 +117,35 @@ class adversarial_bandit (alg : bandit_alg) =
 
     method regret =
       Array.fold_left max neg_infinity summed_rewards -. total_reward
+  end
+
+class exp3 (bandit : adversarial_bandit) learning_rate =
+  object
+    inherit bandit_alg bandit
+
+    val mutable rewards = Array.make bandit#narms 0.
+
+    val mutable learning_rate = learning_rate
+
+    val mutable pulled_arm_prob = 1. /. float bandit#narms
+
+    method select_arm =
+      let probs =
+        rewards |> Array.map (fun rew -> learning_rate *. rew) |> softmax in
+      let arm = random_categorical probs in
+      pulled_arm_prob <- probs.(arm) ;
+      arm
+
+    method update_stats arm reward =
+      let pulled_arm = arm in
+      let rec aux arm =
+        match arm with
+        | -1 -> ()
+        | _ ->
+            rewards.(arm) <- rewards.(arm) +. 1. ;
+            if arm == pulled_arm then
+              rewards.(arm) <-
+                rewards.(arm) -. ((1. -. reward) /. pulled_arm_prob) ;
+            aux (arm - 1) in
+      aux (Array.length rewards - 1)
   end
