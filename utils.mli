@@ -8,3 +8,4 @@ module Array : sig
 end
 
 val random_categorical : Float.t array -> int
+val softmax : Float.t array -> Float.t array

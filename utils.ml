@@ -32,3 +32,9 @@ let random_categorical probs =
   let sample = Random.float 1. in
   let rec aux idx = if sample <= csums.(idx) then idx else aux (idx + 1) in
   aux 0
+
+let softmax logits =
+  let max_logit = Array.fold_left max neg_infinity logits in
+  let logits = Array.map (fun lgt -> exp (lgt -. max_logit)) logits in
+  let denom = Array.fold_left ( +. ) 0. logits in
+  Array.map (fun lgt -> lgt /. denom) logits
