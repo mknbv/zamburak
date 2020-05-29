@@ -71,9 +71,7 @@ class ucb (bandit : bandit) =
           let arm_index arm =
             let m, c = (means.(arm), float counts.(arm)) in
             m +. sqrt (2. *. log time_bonus /. c) in
-          match Array.init self#narms arm_index |> argmax with
-          | None -> -1 (* Shouldn't happen since narms > 0 and argmax code *)
-          | Some arm -> arm )
+          match Array.init self#narms arm_index |> argmax with arm -> arm )
 
     method update_stats arm reward =
       step_count <- step_count + 1 ;

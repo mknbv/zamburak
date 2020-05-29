@@ -6,7 +6,7 @@ let random_normal () =
 let argmax nums =
   let rec aux idx idx_max =
     match idx with
-    | -1 -> if idx_max >= 0 then Some idx_max else None
+    | -1 -> if idx_max >= 0 then idx_max else 0
     | _ -> aux (idx - 1) (if nums.(idx) >= nums.(idx_max) then idx else idx_max)
   in
   let idx = Array.length nums - 1 in

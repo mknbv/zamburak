@@ -1,5 +1,5 @@
 val random_normal : unit -> float
-val argmax : 'a array -> int option
+val argmax : 'a array -> int
 
 module Array : sig
   include module type of Array
