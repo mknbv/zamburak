@@ -9,13 +9,15 @@ class virtual bandit =
     method virtual pull : int -> float
 
     method virtual regret : float
+
+    method reset = total_reward <- 0.
   end
 
 class gaussian_bandit means stds =
   let () = assert (Array.length means = Array.length stds) in
   let () = assert (Array.length means > 0) in
   object
-    inherit bandit
+    inherit bandit as super
 
     val mutable npulls = 0
 
@@ -30,6 +32,10 @@ class gaussian_bandit means stds =
       reward
 
     method regret = (float npulls *. max_mean) -. total_reward
+
+    method! reset =
+      super#reset ;
+      npulls <- 0
   end
 
 class virtual bandit_alg (bandit : bandit) =
@@ -50,11 +56,13 @@ class virtual bandit_alg (bandit : bandit) =
             self#update_stats arm reward ;
             aux (ntimes - 1) in
       aux ntimes
+
+    method reset = bandit#reset
   end
 
 class ucb (bandit : bandit) =
   object (self)
-    inherit bandit_alg bandit
+    inherit bandit_alg bandit as super
 
     val mutable step_count = 0
 
@@ -88,11 +96,17 @@ class ucb (bandit : bandit) =
             let action_gap = max_mean -. mean in
             action_gap +. (log (float npulls) /. action_gap) in
       means |> Array.map action_regret |> Array.fold_left ( +. ) 0.
+
+    method! reset =
+      super#reset ;
+      step_count <- 0 ;
+      means <- Array.make bandit#narms 0. ;
+      counts <- Array.make bandit#narms 0
   end
 
 class adversarial_bandit (alg : bandit_alg) =
   object
-    inherit bandit
+    inherit bandit as super
 
     val mutable summed_rewards = Array.make alg#narms 0.
 
@@ -115,6 +129,10 @@ class adversarial_bandit (alg : bandit_alg) =
 
     method regret =
       Array.fold_left max neg_infinity summed_rewards -. total_reward
+
+    method! reset =
+      super#reset ;
+      summed_rewards <- Array.make alg#narms 0.
   end
 
 class exp3 ?horizon ?learning_rate (bandit : adversarial_bandit) =
@@ -130,7 +148,7 @@ class exp3 ?horizon ?learning_rate (bandit : adversarial_bandit) =
         sqrt (2. *. log narms /. (narms *. horizon)) in
   let learning_rate = process_args () in
   object
-    inherit bandit_alg bandit
+    inherit bandit_alg bandit as super
 
     val mutable rewards = Array.make bandit#narms 0.
 
@@ -155,4 +173,9 @@ class exp3 ?horizon ?learning_rate (bandit : adversarial_bandit) =
                 rewards.(arm) -. ((1. -. reward) /. pulled_arm_prob) ;
             aux (arm - 1) in
       aux (Array.length rewards - 1)
+
+    method! reset =
+      super#reset ;
+      rewards <- Array.make bandit#narms 0. ;
+      pulled_arm_prob <- 1. /. float bandit#narms
   end

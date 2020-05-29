@@ -7,17 +7,19 @@ class virtual bandit :
     method virtual pull : int -> float
 
     method virtual regret : float
+
+    method reset : unit
   end
 
 class gaussian_bandit :
   float array
   -> float array
   -> object
+       inherit bandit
+
        val max_mean : float
 
        val mutable npulls : int
-
-       val mutable total_reward : float
 
        method narms : int
 
@@ -36,6 +38,8 @@ class virtual bandit_alg :
        method virtual update_stats : int -> float -> unit
 
        method pull : ?ntimes:int -> unit -> float
+
+       method virtual reset : unit
      end
 
 class ucb :
@@ -54,11 +58,15 @@ class ucb :
        method select_arm : int
 
        method update_stats : int -> float -> unit
+
+       method reset : unit
      end
 
 class adversarial_bandit :
   bandit_alg
   -> object
+       inherit bandit
+
        val mutable summed_rewards : float array
 
        method narms : int
@@ -82,4 +90,6 @@ class exp3 :
        method select_arm : int
 
        method update_stats : int -> float -> unit
+
+       method reset : unit
      end
