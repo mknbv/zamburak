@@ -104,7 +104,8 @@ class ucb (bandit : bandit) =
       counts <- Array.make bandit#narms 0
   end
 
-class adversarial_bandit (alg : bandit_alg) =
+class adversarial_bandit make_alg =
+  let alg = make_alg () in
   object
     inherit bandit as super
 

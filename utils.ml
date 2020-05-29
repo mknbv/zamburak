@@ -28,7 +28,8 @@ end
 
 let random_categorical probs =
   let csums = Array.accumulate ( +. ) probs in
-  let () = assert (Float.equal csums.(Array.length csums - 1) 1.) in
+  if Float.abs (csums.(Array.length csums - 1) -. 1.) > 1e-8 then
+    raise (Invalid_argument "probs must sum to 1.") ;
   let sample = Random.float 1. in
   let rec aux idx = if sample <= csums.(idx) then idx else aux (idx + 1) in
   aux 0
