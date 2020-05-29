@@ -1,0 +1,3 @@
+(library
+ (name zamburak)
+ (public_name zamburak))
