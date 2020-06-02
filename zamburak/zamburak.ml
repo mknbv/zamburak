@@ -74,13 +74,13 @@ class ucb (bandit : bandit) =
     method select_arm =
       match step_count < self#narms with
       | true -> step_count
-      | false -> (
+      | false ->
           let t = float step_count +. 1. in
           let time_bonus = 1. +. (t *. (log t ** 2.)) in
           let arm_index arm =
             let m, c = (means.(arm), float counts.(arm)) in
             m +. sqrt (2. *. log time_bonus /. c) in
-          match Array.init self#narms arm_index |> argmax with arm -> arm )
+          Array.init self#narms arm_index |> argmax
 
     method update_stats arm reward =
       step_count <- step_count + 1 ;
@@ -149,7 +149,7 @@ class exp3 ?horizon ?learning_rate (bandit : adversarial_bandit) =
         let horizon = float horizon in
         sqrt (2. *. log narms /. (narms *. horizon)) in
   let learning_rate = process_args () in
-  object
+  object (self)
     inherit bandit_alg bandit as super
 
     val mutable rewards = Array.make bandit#narms 0.
@@ -175,6 +175,9 @@ class exp3 ?horizon ?learning_rate (bandit : adversarial_bandit) =
                 rewards.(arm) -. ((1. -. reward) /. pulled_arm_prob) ;
             aux (arm - 1) in
       aux (Array.length rewards - 1)
+
+    method regret_bound npulls =
+      sqrt (2. *. float (npulls * self#narms) *. log (float self#narms))
 
     method! reset =
       super#reset ;

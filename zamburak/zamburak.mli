@@ -94,5 +94,7 @@ class exp3 :
 
        method update_stats : int -> float -> unit
 
+       method regret_bound : int -> float
+
        method reset : unit
      end
