@@ -101,3 +101,22 @@ class exp3 :
 
        method reset : unit
      end
+
+class exp3ix :
+  ?horizon:int
+  -> ?learning_rate:float
+  -> ?gamma:float
+  -> bandit
+  -> object
+       inherit bandit_alg
+
+       val losses : float array
+
+       val mutable selected_arm_prob : float
+
+       method select_arm : int
+
+       method update_stats : int -> float -> unit
+
+       method reset : unit
+     end

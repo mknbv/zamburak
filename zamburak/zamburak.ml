@@ -185,3 +185,42 @@ class exp3 ?horizon ?learning_rate (bandit : adversarial_bandit) =
       rewards <- Array.make bandit#narms 0. ;
       selected_arm_prob <- 1. /. float bandit#narms
   end
+
+class exp3ix ?horizon ?learning_rate ?gamma (bandit : adversarial_bandit) =
+  let get_learning_rate () =
+    match (horizon, learning_rate) with
+    | None, None | Some _, Some _ ->
+        raise
+          (Failure "exactly one of horizon and learning_rate must be specified")
+    | None, Some learning_rate -> learning_rate
+    | Some horizon, None ->
+        sqrt
+          ( 2.
+          *. log (float (bandit#narms + 1))
+          /. float (horizon * bandit#narms) ) in
+  let learning_rate = get_learning_rate () in
+  let gamma =
+    match gamma with None -> learning_rate /. 2. | Some gamma -> gamma in
+  object
+    inherit bandit_alg bandit as super
+
+    val losses = Array.make bandit#narms 0.
+
+    val mutable selected_arm_prob = 1. /. float bandit#narms
+
+    method select_arm =
+      let probs =
+        losses |> Array.map (fun l -> ~-.learning_rate *. l) |> softmax in
+      let arm = random_categorical probs in
+      selected_arm_prob <- probs.(arm) ;
+      arm
+
+    method update_stats arm reward =
+      losses.(arm) <-
+        losses.(arm) +. ((1. -. reward) /. (selected_arm_prob +. gamma))
+
+    method! reset =
+      super#reset ;
+      Array.fill losses 0 (Array.length losses) 0. ;
+      selected_arm_prob <- 1. /. float bandit#narms
+  end
