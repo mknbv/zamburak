@@ -66,7 +66,10 @@ class ucb :
 
 class adversarial_bandit :
   (   unit
-   -> < narms: int ; select_arm: int ; update_stats: int -> float -> unit ; .. >)
+   -> < narms: int
+      ; select_arm: int
+      ; update_stats: int -> float -> unit
+      ; .. >)
   -> object
        inherit bandit
 

@@ -117,7 +117,8 @@ class adversarial_bandit make_alg =
     method pull arm =
       let worst_arm = alg#select_arm in
       let rewards =
-        Array.init alg#narms (fun arm -> Bool.to_float (arm <> worst_arm)) in
+        Array.init alg#narms (fun arm -> Bool.to_float (arm <> worst_arm))
+      in
       alg#update_stats worst_arm rewards.(worst_arm) ;
       let rec update_summed_rewards idx =
         match idx < Array.length summed_rewards with
