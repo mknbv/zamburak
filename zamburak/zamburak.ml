@@ -139,7 +139,7 @@ class adversarial_bandit make_alg =
   end
 
 class exp3 ?horizon ?learning_rate (bandit : adversarial_bandit) =
-  let process_args () =
+  let get_learning_rate () =
     match (horizon, learning_rate) with
     | None, None | Some _, Some _ ->
         raise
@@ -149,31 +149,31 @@ class exp3 ?horizon ?learning_rate (bandit : adversarial_bandit) =
         let narms = float bandit#narms in
         let horizon = float horizon in
         sqrt (2. *. log narms /. (narms *. horizon)) in
-  let learning_rate = process_args () in
+  let learning_rate = get_learning_rate () in
   object (self)
     inherit bandit_alg bandit as super
 
     val mutable rewards = Array.make bandit#narms 0.
 
-    val mutable pulled_arm_prob = 1. /. float bandit#narms
+    val mutable selected_arm_prob = 1. /. float bandit#narms
 
     method select_arm =
       let probs =
         rewards |> Array.map (fun rew -> learning_rate *. rew) |> softmax in
       let arm = random_categorical probs in
-      pulled_arm_prob <- probs.(arm) ;
+      selected_arm_prob <- probs.(arm) ;
       arm
 
     method update_stats arm reward =
-      let pulled_arm = arm in
+      let selected_arm = arm in
       let rec aux arm =
         match arm with
         | -1 -> ()
         | _ ->
             rewards.(arm) <- rewards.(arm) +. 1. ;
-            if arm == pulled_arm then
+            if arm == selected_arm then
               rewards.(arm) <-
-                rewards.(arm) -. ((1. -. reward) /. pulled_arm_prob) ;
+                rewards.(arm) -. ((1. -. reward) /. selected_arm_prob) ;
             aux (arm - 1) in
       aux (Array.length rewards - 1)
 
@@ -183,5 +183,5 @@ class exp3 ?horizon ?learning_rate (bandit : adversarial_bandit) =
     method! reset =
       super#reset ;
       rewards <- Array.make bandit#narms 0. ;
-      pulled_arm_prob <- 1. /. float bandit#narms
+      selected_arm_prob <- 1. /. float bandit#narms
   end

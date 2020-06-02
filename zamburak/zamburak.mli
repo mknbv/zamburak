@@ -91,7 +91,7 @@ class exp3 :
 
        val mutable rewards : float array
 
-       val mutable pulled_arm_prob : float
+       val mutable selected_arm_prob : float
 
        method select_arm : int
 
