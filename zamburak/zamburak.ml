@@ -67,9 +67,9 @@ class ucb (bandit : bandit) =
 
     val mutable step_count = 0
 
-    val mutable means = Array.make bandit#narms 0.
+    val means = Array.make bandit#narms 0.
 
-    val mutable counts = Array.make bandit#narms 0
+    val counts = Array.make bandit#narms 0
 
     method select_arm =
       match step_count < self#narms with
@@ -101,8 +101,8 @@ class ucb (bandit : bandit) =
     method! reset =
       super#reset ;
       step_count <- 0 ;
-      means <- Array.make bandit#narms 0. ;
-      counts <- Array.make bandit#narms 0
+      Array.fill means 0 (Array.length means) 0. ;
+      Array.fill counts 0 (Array.length counts) 0
   end
 
 class adversarial_bandit make_alg =
@@ -110,7 +110,7 @@ class adversarial_bandit make_alg =
   object
     inherit bandit as super
 
-    val mutable summed_rewards = Array.make alg#narms 0.
+    val summed_rewards = Array.make alg#narms 0.
 
     method narms = alg#narms
 
@@ -135,7 +135,7 @@ class adversarial_bandit make_alg =
 
     method! reset =
       super#reset ;
-      summed_rewards <- Array.make alg#narms 0.
+      Array.fill summed_rewards 0 (Array.length summed_rewards) 0.
   end
 
 class exp3 ?horizon ?learning_rate (bandit : adversarial_bandit) =
@@ -153,7 +153,7 @@ class exp3 ?horizon ?learning_rate (bandit : adversarial_bandit) =
   object (self)
     inherit bandit_alg bandit as super
 
-    val mutable rewards = Array.make bandit#narms 0.
+    val rewards = Array.make bandit#narms 0.
 
     val mutable selected_arm_prob = 1. /. float bandit#narms
 
@@ -182,7 +182,7 @@ class exp3 ?horizon ?learning_rate (bandit : adversarial_bandit) =
 
     method! reset =
       super#reset ;
-      rewards <- Array.make bandit#narms 0. ;
+      Array.fill rewards 0 (Array.length rewards) 0. ;
       selected_arm_prob <- 1. /. float bandit#narms
   end
 

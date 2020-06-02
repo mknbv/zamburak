@@ -49,9 +49,9 @@ class ucb :
   -> object
        inherit bandit_alg
 
-       val mutable counts : int array
+       val counts : int array
 
-       val mutable means : float array
+       val means : float array
 
        val mutable step_count : int
 
@@ -73,7 +73,7 @@ class adversarial_bandit :
   -> object
        inherit bandit
 
-       val mutable summed_rewards : float array
+       val summed_rewards : float array
 
        method narms : int
 
@@ -89,7 +89,7 @@ class exp3 :
   -> object
        inherit bandit_alg
 
-       val mutable rewards : float array
+       val rewards : float array
 
        val mutable selected_arm_prob : float
 
