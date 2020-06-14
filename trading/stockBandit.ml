@@ -1,18 +1,28 @@
-let read_file file =
-  let ic = open_in file in
-  let read_line () =
-    try Some (input_line ic) with
-    | End_of_file -> close_in ic ; None
-    | e -> close_in_noerr ic ; raise e in
-  read_line
+class file_reader fname =
+  object
+    val mutable ic = open_in fname
 
-let read_csv ?(sep = ',') file =
-  let line_reader = read_file file in
-  let csv_reader () =
-    match line_reader () with
-    | None -> None
-    | Some line -> Some (String.split_on_char sep line) in
-  csv_reader
+    method next_line =
+      try Some (input_line ic) with
+      | End_of_file -> close_in ic ; None
+      | e -> close_in_noerr ic ; raise e
+
+    method reset =
+      close_in ic ;
+      ic <- open_in fname
+  end
+
+class csv_reader ?(sep = ',') fname =
+  object (self)
+    inherit file_reader fname as super
+
+    method line_to_data line = String.split_on_char sep line
+
+    method next_data =
+      match super#next_line with
+      | None -> None
+      | Some line -> Some (self#line_to_data line)
+  end
 
 let get_tickers header =
   let rec aux header idx tickers =
@@ -24,10 +34,10 @@ let get_tickers header =
     | _ :: header, _ -> aux header (idx + 1) tickers in
   aux header 0 [] |> List.rev
 
-class stock_bandit ?(investment = 1.) csv_reader =
+class stock_bandit ?(investment = 1.) data_reader =
   let header =
-    match csv_reader () with
-    | None -> raise (Failure "csv_reader cannot be empty")
+    match data_reader#next_data with
+    | None -> raise (Failure "data_reader cannot be empty")
     | Some line -> line in
   let tickers = Array.of_list @@ get_tickers header in
   let narms = Array.length tickers in
@@ -47,7 +57,7 @@ class stock_bandit ?(investment = 1.) csv_reader =
       Array.init narms payoff
 
     method pull arm =
-      match csv_reader () with
+      match data_reader#next_data with
       | None -> None
       | Some data ->
           let payoffs = data |> Array.of_list |> self#payoffs in
@@ -67,5 +77,7 @@ class stock_bandit ?(investment = 1.) csv_reader =
 
     method! reset =
       super#reset ;
-      Array.fill summed_rewards 0 (Array.length summed_rewards) 0.
+      Array.fill summed_rewards 0 (Array.length summed_rewards) 0. ;
+      data_reader#reset ;
+      ignore data_reader#next_data
   end
