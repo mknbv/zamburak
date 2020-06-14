@@ -48,7 +48,7 @@ class stock_bandit ?(investment = 1.) csv_reader =
 
     method pull arm =
       match csv_reader () with
-      | None -> Float.nan
+      | None -> None
       | Some data ->
           let payoffs = data |> Array.of_list |> self#payoffs in
           let rec update_summed_rewards idx =
@@ -60,7 +60,7 @@ class stock_bandit ?(investment = 1.) csv_reader =
           update_summed_rewards 0 ;
           let reward = payoffs.(arm) in
           total_reward <- total_reward +. reward ;
-          reward
+          Some reward
 
     method regret =
       Array.fold_left max neg_infinity summed_rewards -. total_reward

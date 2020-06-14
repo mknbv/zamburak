@@ -7,7 +7,7 @@ class virtual bandit =
 
     method virtual narms : int
 
-    method virtual pull : int -> float
+    method virtual pull : int -> float option
 
     method virtual regret : float
 
@@ -30,7 +30,7 @@ class gaussian_bandit means stds =
       let reward = means.(arm) +. (stds.(arm) *. random_normal ()) in
       total_reward <- total_reward +. reward ;
       npulls <- npulls + 1 ;
-      reward
+      Some reward
 
     method regret = (float npulls *. max_mean) -. total_reward
 
@@ -51,11 +51,13 @@ class virtual bandit_alg (bandit : bandit) =
       let rec aux ntimes =
         match ntimes with
         | 0 -> bandit#regret
-        | _ ->
+        | _ -> (
             let arm = self#select_arm in
-            let reward = bandit#pull arm in
-            self#update_stats arm reward ;
-            aux (ntimes - 1) in
+            match bandit#pull arm with
+            | None -> bandit#regret
+            | Some reward ->
+                self#update_stats arm reward ;
+                aux (ntimes - 1) ) in
       aux ntimes
 
     method reset = bandit#reset
@@ -128,7 +130,7 @@ class adversarial_bandit make_alg =
             update_summed_rewards (idx + 1) in
       update_summed_rewards 0 ;
       total_reward <- total_reward +. rewards.(arm) ;
-      rewards.(arm)
+      Some rewards.(arm)
 
     method regret =
       Array.fold_left max neg_infinity summed_rewards -. total_reward

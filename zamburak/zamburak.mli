@@ -6,7 +6,7 @@ class virtual bandit :
 
     method virtual narms : int
 
-    method virtual pull : int -> float
+    method virtual pull : int -> float option
 
     method virtual regret : float
 
@@ -25,7 +25,7 @@ class gaussian_bandit :
 
        method narms : int
 
-       method pull : int -> float
+       method pull : int -> float option
 
        method regret : float
      end
@@ -77,7 +77,7 @@ class adversarial_bandit :
 
        method narms : int
 
-       method pull : int -> float
+       method pull : int -> float option
 
        method regret : float
      end
