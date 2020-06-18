@@ -82,6 +82,18 @@ class adversarial_bandit :
        method regret : float
      end
 
+class random_alg :
+  bandit
+  -> object
+       inherit bandit_alg
+
+       method select_arm : int
+
+       method update_stats : int -> float -> unit
+
+       method reset : unit
+     end
+
 class exp3 :
   ?horizon:int
   -> ?learning_rate:float

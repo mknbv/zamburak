@@ -140,6 +140,21 @@ class adversarial_bandit make_alg =
       Array.fill summed_rewards 0 (Array.length summed_rewards) 0.
   end
 
+class random_alg (bandit : bandit) =
+  object
+    inherit bandit_alg bandit as super
+
+    val probs = Array.init bandit#narms (fun _ -> 1. /. float bandit#narms)
+
+    method select_arm = probs |> softmax |> random_categorical
+
+    method update_stats arm reward =
+      ignore (arm, reward) ;
+      ()
+
+    method! reset = super#reset
+  end
+
 class exp3 ?horizon ?learning_rate (bandit : adversarial_bandit) =
   let get_learning_rate () =
     match (horizon, learning_rate) with
