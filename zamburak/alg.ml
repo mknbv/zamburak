@@ -1,8 +1,8 @@
 open Interface
 open Utils
 
-class virtual base_bandit_alg (bandit : bandit) =
-  object (self : #bandit_alg)
+class virtual base_alg (bandit : bandit) =
+  object (self : #alg)
     method narms = bandit#narms
 
     method virtual private select_arm : int
@@ -27,7 +27,7 @@ class virtual base_bandit_alg (bandit : bandit) =
 
 class ucb (bandit : bandit) =
   object (self)
-    inherit base_bandit_alg bandit as super
+    inherit base_alg bandit as super
 
     val mutable step_count = 0
 
@@ -71,7 +71,7 @@ class ucb (bandit : bandit) =
 
 class random_alg (bandit : bandit) =
   object
-    inherit base_bandit_alg bandit as super
+    inherit base_alg bandit as super
 
     val probs = Array.init bandit#narms (fun _ -> 1. /. float bandit#narms)
 
@@ -97,7 +97,7 @@ class exp3 ?horizon ?learning_rate (bandit : bandit) =
         sqrt (2. *. log narms /. (narms *. horizon)) in
   let learning_rate = get_learning_rate () in
   object (self)
-    inherit base_bandit_alg bandit as super
+    inherit base_alg bandit as super
 
     val rewards = Array.make bandit#narms 0.
 
@@ -148,7 +148,7 @@ class exp3ix ?horizon ?learning_rate ?gamma (bandit : bandit) =
   let gamma =
     match gamma with None -> learning_rate /. 2. | Some gamma -> gamma in
   object
-    inherit base_bandit_alg bandit as super
+    inherit base_alg bandit as super
 
     val losses = Array.make bandit#narms 0.
 

@@ -9,7 +9,7 @@ class type bandit =
     method reset : unit
   end
 
-class type bandit_alg =
+class type alg =
   object
     method narms : int
 
