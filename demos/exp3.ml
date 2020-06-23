@@ -3,10 +3,9 @@ open Matplotlib
 
 let () =
   let batch_size, npoints, step = (100, 201, 10) in
+  let narms = 2 in
   let bandits =
-    Array.init batch_size (fun _ ->
-        new adversarial_bandit (fun () ->
-            new ucb (new gaussian_bandit (Array.make 2 0.) (Array.make 2 1.))))
+    Array.init batch_size (fun _ -> new ucb_adversarial_bandit narms)
   in
   let ucbs = Array.init batch_size (fun i -> new ucb bandits.(i)) in
   let ucb_regrets =

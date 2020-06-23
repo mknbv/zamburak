@@ -1,4 +1,4 @@
 (library
  (name zamburak)
  (public_name zamburak)
- (modules zamburak utils))
+ (modules zamburak interface bandit alg utils))
