@@ -1,7 +1,7 @@
 (executable
  (name ucb)
  (libraries zamburak matplotlib)
- (modules ucb))
+ (modules ucb common))
 
 (executable
  (name exp3)
