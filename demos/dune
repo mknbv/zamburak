@@ -1,9 +1,14 @@
+(library
+ (name common)
+ (libraries zamburak matplotlib)
+ (modules common))
+
 (executable
  (name ucb)
- (libraries zamburak matplotlib)
- (modules ucb common))
+ (libraries zamburak matplotlib common)
+ (modules ucb))
 
 (executable
  (name exp3)
- (libraries zamburak matplotlib)
+ (libraries zamburak matplotlib common)
  (modules exp3))

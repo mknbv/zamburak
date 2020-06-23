@@ -38,8 +38,7 @@ let alg_batch batch_size (make_bandit : unit -> #bandit)
 
 let get_regrets npoints step algs =
   Array.iter (fun alg -> alg#reset) algs ;
-  let regret_after_pull (alg : #alg) =
-    alg#pull ~ntimes:step () in
+  let regret_after_pull (alg : #alg) = alg#pull ~ntimes:step () in
   Array.init npoints (fun _ ->
       Array.map (fun alg -> regret_after_pull alg) algs)
 

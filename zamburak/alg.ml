@@ -52,16 +52,6 @@ class ucb (bandit : bandit) =
       let m, c = (means.(arm), float counts.(arm)) in
       means.(arm) <- m -. (m /. c) +. (reward /. c)
 
-    method regret_bound ?(npulls = step_count) means =
-      let max_mean = Array.fold_left max neg_infinity means in
-      let action_regret mean =
-        match mean = max_mean with
-        | true -> 0.
-        | false ->
-            let action_gap = max_mean -. mean in
-            action_gap +. (log (float npulls) /. action_gap) in
-      means |> Array.map action_regret |> Array.fold_left ( +. ) 0.
-
     method! reset =
       super#reset ;
       step_count <- 0 ;
@@ -96,7 +86,7 @@ class exp3 ?horizon ?learning_rate (bandit : bandit) =
         let horizon = float horizon in
         sqrt (2. *. log narms /. (narms *. horizon)) in
   let learning_rate = get_learning_rate () in
-  object (self)
+  object
     inherit base_alg bandit as super
 
     val rewards = Array.make bandit#narms 0.
@@ -122,9 +112,6 @@ class exp3 ?horizon ?learning_rate (bandit : bandit) =
                 rewards.(arm) -. ((1. -. reward) /. selected_arm_prob) ;
             aux (arm - 1) in
       aux (Array.length rewards - 1)
-
-    method regret_bound npulls =
-      sqrt (2. *. float (npulls * self#narms) *. log (float self#narms))
 
     method! reset =
       super#reset ;
@@ -170,3 +157,16 @@ class exp3ix ?horizon ?learning_rate ?gamma (bandit : bandit) =
       Array.fill losses 0 (Array.length losses) 0. ;
       selected_arm_prob <- 1. /. float bandit#narms
   end
+
+let ucb_regret_bound means npulls =
+  let max_mean = Array.fold_left max neg_infinity means in
+  let action_regret mean =
+    match mean = max_mean with
+    | true -> 0.
+    | false ->
+        let action_gap = max_mean -. mean in
+        action_gap +. (log (float npulls) /. action_gap) in
+  means |> Array.map action_regret |> Array.fold_left ( +. ) 0.
+
+let exp3_regret_bound narms npulls =
+  sqrt (2. *. float (npulls * narms) *. log (float narms))

@@ -10,9 +10,7 @@ let () =
   let xs = Array.map float (Array.range ~step npoints) in
   Pyplot.plot_mean_std ~plot_func:`semilogy ~label:"UCB" xs regrets ;
   Pyplot.plot ~xs
-    (Array.map
-       (fun n -> ucbs.(0)#regret_bound ~npulls:n means)
-       (Array.range ~step npoints)) ;
+    (Array.map (fun n -> ucb_regret_bound means n) (Array.range ~step npoints)) ;
   Pyplot.plot ~color:(Other "gray") ~xs xs ;
   Pyplot.set_figure_settings ~xlabel:"$n$" ~ylabel:"Regret@$n$"
     ~labels:[|"Linear regret"; "UCB"; "UCB theoretical bound"|]
