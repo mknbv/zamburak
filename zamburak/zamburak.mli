@@ -15,7 +15,8 @@ class virtual bandit :
 
 class gaussian_bandit :
   float array
-  -> float array
+  -> ?stds:float array
+  -> unit
   -> object
        inherit bandit
 

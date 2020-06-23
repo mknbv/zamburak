@@ -14,7 +14,11 @@ class virtual bandit =
     method reset = total_reward <- 0.
   end
 
-class gaussian_bandit means stds =
+class gaussian_bandit means ?stds () =
+  let stds =
+    match stds with
+    | None -> Array.make (Array.length means) 1.
+    | Some stds -> stds in
   let () = assert (Array.length means = Array.length stds) in
   let () = assert (Array.length means > 0) in
   object
