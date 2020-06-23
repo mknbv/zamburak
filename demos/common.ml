@@ -44,12 +44,19 @@ let get_regrets npoints step algs =
 module Pyplot = struct
   include Pyplot
 
-  let plot_mean_std ?(linewidth = 2.) ?(alpha = 0.3) ?label x ys =
+  let plot_mean_std ?(plot_func = `plot) ?(linewidth = 2.) ?(alpha = 0.3)
+      ?label x ys =
     let means = Array.map Array.float_mean ys in
     let stds = Array.map Array.float_std ys in
+    let plot_func =
+      match plot_func with
+      | `semilogy -> Pyplot.semilogy
+      | `semilogx -> Pyplot.semilogx
+      | `loglog -> Pyplot.loglog
+      | `plot -> Pyplot.plot in
     ( match label with
-    | None -> Pyplot.plot ~linewidth ~xs:x means
-    | Some label -> Pyplot.plot ~linewidth ~label ~xs:x means ) ;
+    | None -> plot_func ~linewidth ~xs:x means
+    | Some label -> plot_func ~linewidth ~label ~xs:x means ) ;
     Pyplot.fill_between ~alpha x
       (Array.map2 ( -. ) means stds)
       (Array.map2 ( +. ) means stds)
