@@ -1,17 +1,15 @@
 open Utils
 module Utils = Utils
 
-class virtual bandit =
+class type bandit =
   object
-    val mutable total_reward = 0.
+    method narms : int
 
-    method virtual narms : int
+    method pull : int -> float option
 
-    method virtual pull : int -> float option
+    method regret : float
 
-    method virtual regret : float
-
-    method reset = total_reward <- 0.
+    method reset : unit
   end
 
 class gaussian_bandit means ?stds () =
@@ -21,8 +19,8 @@ class gaussian_bandit means ?stds () =
     | Some stds -> stds in
   let () = assert (Array.length means = Array.length stds) in
   let () = assert (Array.length means > 0) in
-  object
-    inherit bandit as super
+  object (_ : #bandit)
+    val mutable total_reward = 0.
 
     val mutable npulls = 0
 
@@ -38,8 +36,8 @@ class gaussian_bandit means ?stds () =
 
     method regret = (float npulls *. max_mean) -. total_reward
 
-    method! reset =
-      super#reset ;
+    method reset =
+      total_reward <- 0. ;
       npulls <- 0
   end
 
@@ -113,8 +111,8 @@ class ucb (bandit : bandit) =
 
 class adversarial_bandit make_alg =
   let alg = make_alg () in
-  object
-    inherit bandit as super
+  object (_ : #bandit)
+    val mutable total_reward = 0.
 
     val summed_rewards = Array.make alg#narms 0.
 
@@ -139,8 +137,8 @@ class adversarial_bandit make_alg =
     method regret =
       Array.fold_left max neg_infinity summed_rewards -. total_reward
 
-    method! reset =
-      super#reset ;
+    method reset =
+      total_reward <- 0. ;
       Array.fill summed_rewards 0 (Array.length summed_rewards) 0.
   end
 

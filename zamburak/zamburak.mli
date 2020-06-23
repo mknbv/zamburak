@@ -1,14 +1,12 @@
 module Utils = Utils
 
-class virtual bandit :
+class type bandit =
   object
-    val mutable total_reward : float
+    method narms : int
 
-    method virtual narms : int
+    method pull : int -> float option
 
-    method virtual pull : int -> float option
-
-    method virtual regret : float
+    method regret : float
 
     method reset : unit
   end
@@ -23,12 +21,6 @@ class gaussian_bandit :
        val max_mean : float
 
        val mutable npulls : int
-
-       method narms : int
-
-       method pull : int -> float option
-
-       method regret : float
      end
 
 class virtual bandit_alg :
@@ -75,12 +67,6 @@ class adversarial_bandit :
        inherit bandit
 
        val summed_rewards : float array
-
-       method narms : int
-
-       method pull : int -> float option
-
-       method regret : float
      end
 
 class random_alg :
