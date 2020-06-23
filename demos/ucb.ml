@@ -14,7 +14,7 @@ let () =
        (fun n -> ucbs.(0)#regret_bound ~npulls:n means)
        (Array.range ~step npoints)) ;
   Pyplot.plot ~color:(Other "gray") ~xs xs ;
-  set_figure_settings ~xlabel:"$n$" ~ylabel:"Regret@$n$"
+  Pyplot.set_figure_settings ~xlabel:"$n$" ~ylabel:"Regret@$n$"
     ~labels:[|"Linear regret"; "UCB"; "UCB theoretical bound"|]
     () ;
   Mpl.show ()

@@ -60,20 +60,20 @@ module Pyplot = struct
     Pyplot.fill_between ~alpha x
       (Array.map2 ( -. ) means stds)
       (Array.map2 ( +. ) means stds)
-end
 
-let set_figure_settings ?(grid = true) ?xlabel ?ylabel ?labels ?(legend = true)
-    () =
-  Pyplot.grid grid ;
-  let set_label axis label =
-    match label with
-    | None -> ()
-    | Some label -> (
-      match axis with `x -> Pyplot.xlabel label | `y -> Pyplot.ylabel label )
-  in
-  set_label `x xlabel ;
-  set_label `y ylabel ;
-  if legend then
-    match labels with
-    | None -> Pyplot.legend ()
-    | Some labels -> Pyplot.legend ~labels ()
+  let set_figure_settings ?(grid = true) ?xlabel ?ylabel ?labels
+      ?(legend = true) () =
+    Pyplot.grid grid ;
+    let set_label axis label =
+      match label with
+      | None -> ()
+      | Some label -> (
+        match axis with `x -> Pyplot.xlabel label | `y -> Pyplot.ylabel label )
+    in
+    set_label `x xlabel ;
+    set_label `y ylabel ;
+    if legend then
+      match labels with
+      | None -> Pyplot.legend ()
+      | Some labels -> Pyplot.legend ~labels ()
+end
