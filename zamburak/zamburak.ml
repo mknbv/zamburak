@@ -41,13 +41,22 @@ class gaussian_bandit means ?stds () =
       npulls <- 0
   end
 
-class virtual bandit_alg (bandit : bandit) =
-  object (self)
+class type bandit_alg =
+  object
+    method narms : int
+
+    method pull : ?ntimes:int -> unit -> float
+
+    method reset : unit
+  end
+
+class virtual base_bandit_alg (bandit : bandit) =
+  object (self : #bandit_alg)
     method narms = bandit#narms
 
-    method virtual select_arm : int
+    method virtual private select_arm : int
 
-    method virtual update_stats : int -> float -> unit
+    method virtual private update_stats : int -> float -> unit
 
     method pull ?(ntimes = 1) () =
       let rec aux ntimes =
@@ -67,7 +76,7 @@ class virtual bandit_alg (bandit : bandit) =
 
 class ucb (bandit : bandit) =
   object (self)
-    inherit bandit_alg bandit as super
+    inherit base_bandit_alg bandit as super
 
     val mutable step_count = 0
 
@@ -75,7 +84,7 @@ class ucb (bandit : bandit) =
 
     val counts = Array.make bandit#narms 0
 
-    method select_arm =
+    method private select_arm =
       match step_count < self#narms with
       | true -> step_count
       | false ->
@@ -86,7 +95,7 @@ class ucb (bandit : bandit) =
             m +. sqrt (2. *. log time_bonus /. c) in
           Array.init self#narms arm_index |> argmax
 
-    method update_stats arm reward =
+    method private update_stats arm reward =
       step_count <- step_count + 1 ;
       counts.(arm) <- counts.(arm) + 1 ;
       let m, c = (means.(arm), float counts.(arm)) in
@@ -144,13 +153,13 @@ class adversarial_bandit make_alg =
 
 class random_alg (bandit : bandit) =
   object
-    inherit bandit_alg bandit as super
+    inherit base_bandit_alg bandit as super
 
     val probs = Array.init bandit#narms (fun _ -> 1. /. float bandit#narms)
 
-    method select_arm = probs |> softmax |> random_categorical
+    method private select_arm = probs |> softmax |> random_categorical
 
-    method update_stats arm reward =
+    method private update_stats arm reward =
       ignore (arm, reward) ;
       ()
 
@@ -170,20 +179,20 @@ class exp3 ?horizon ?learning_rate (bandit : adversarial_bandit) =
         sqrt (2. *. log narms /. (narms *. horizon)) in
   let learning_rate = get_learning_rate () in
   object (self)
-    inherit bandit_alg bandit as super
+    inherit base_bandit_alg bandit as super
 
     val rewards = Array.make bandit#narms 0.
 
     val mutable selected_arm_prob = 1. /. float bandit#narms
 
-    method select_arm =
+    method private select_arm =
       let probs =
         rewards |> Array.map (fun rew -> learning_rate *. rew) |> softmax in
       let arm = random_categorical probs in
       selected_arm_prob <- probs.(arm) ;
       arm
 
-    method update_stats arm reward =
+    method private update_stats arm reward =
       let selected_arm = arm in
       let rec aux arm =
         match arm with
@@ -221,20 +230,20 @@ class exp3ix ?horizon ?learning_rate ?gamma (bandit : adversarial_bandit) =
   let gamma =
     match gamma with None -> learning_rate /. 2. | Some gamma -> gamma in
   object
-    inherit bandit_alg bandit as super
+    inherit base_bandit_alg bandit as super
 
     val losses = Array.make bandit#narms 0.
 
     val mutable selected_arm_prob = 1. /. float bandit#narms
 
-    method select_arm =
+    method private select_arm =
       let probs =
         losses |> Array.map (fun l -> ~-.learning_rate *. l) |> softmax in
       let arm = random_categorical probs in
       selected_arm_prob <- probs.(arm) ;
       arm
 
-    method update_stats arm reward =
+    method private update_stats arm reward =
       losses.(arm) <-
         losses.(arm) +. ((1. -. reward) /. (selected_arm_prob +. gamma))
 

@@ -23,16 +23,23 @@ class gaussian_bandit :
        val mutable npulls : int
      end
 
-class virtual bandit_alg :
+class type bandit_alg =
+  object
+    method narms : int
+
+    method pull : ?ntimes:int -> unit -> float
+
+    method reset : unit
+  end
+
+class virtual base_bandit_alg :
   bandit
   -> object
-       method narms : int
+       inherit bandit_alg
 
-       method virtual select_arm : int
+       method virtual private select_arm : int
 
-       method virtual update_stats : int -> float -> unit
-
-       method pull : ?ntimes:int -> unit -> float
+       method virtual private update_stats : int -> float -> unit
 
        method virtual reset : unit
      end
@@ -40,7 +47,7 @@ class virtual bandit_alg :
 class ucb :
   bandit
   -> object
-       inherit bandit_alg
+       inherit base_bandit_alg
 
        val counts : int array
 
@@ -50,9 +57,9 @@ class ucb :
 
        method regret_bound : ?npulls:int -> float array -> float
 
-       method select_arm : int
+       method private select_arm : int
 
-       method update_stats : int -> float -> unit
+       method private update_stats : int -> float -> unit
 
        method reset : unit
      end
@@ -72,11 +79,11 @@ class adversarial_bandit :
 class random_alg :
   bandit
   -> object
-       inherit bandit_alg
+       inherit base_bandit_alg
 
-       method select_arm : int
+       method private select_arm : int
 
-       method update_stats : int -> float -> unit
+       method private update_stats : int -> float -> unit
 
        method reset : unit
      end
@@ -86,15 +93,15 @@ class exp3 :
   -> ?learning_rate:float
   -> bandit
   -> object
-       inherit bandit_alg
+       inherit base_bandit_alg
 
        val rewards : float array
 
        val mutable selected_arm_prob : float
 
-       method select_arm : int
+       method private select_arm : int
 
-       method update_stats : int -> float -> unit
+       method private update_stats : int -> float -> unit
 
        method regret_bound : int -> float
 
@@ -107,15 +114,15 @@ class exp3ix :
   -> ?gamma:float
   -> bandit
   -> object
-       inherit bandit_alg
+       inherit base_bandit_alg
 
        val losses : float array
 
        val mutable selected_arm_prob : float
 
-       method select_arm : int
+       method private select_arm : int
 
-       method update_stats : int -> float -> unit
+       method private update_stats : int -> float -> unit
 
        method reset : unit
      end
