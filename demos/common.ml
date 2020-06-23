@@ -1,4 +1,5 @@
 open Matplotlib
+open Zamburak
 
 module Array = struct
   include Array
@@ -31,12 +32,13 @@ module Array = struct
     sqrt (n /. (n -. 1.) *. aux 0 0.)
 end
 
-let alg_batch batch_size make_bandit make_alg =
+let alg_batch batch_size (make_bandit : unit -> #bandit)
+    (make_alg : bandit -> #alg) =
   Array.init batch_size (fun _ -> make_alg (make_bandit ()))
 
 let get_regrets npoints step algs =
   Array.iter (fun alg -> alg#reset) algs ;
-  let regret_after_pull (alg : < pull: ?ntimes:int -> unit -> float ; .. >) =
+  let regret_after_pull (alg : #alg) =
     alg#pull ~ntimes:step () in
   Array.init npoints (fun _ ->
       Array.map (fun alg -> regret_after_pull alg) algs)
