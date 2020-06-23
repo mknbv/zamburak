@@ -3,6 +3,9 @@ open Matplotlib
 module Array = struct
   include Array
 
+  let range ?(start = 0) ?(step = 1) size =
+    Array.init size (fun i -> start + (i * step))
+
   let float_mean arr =
     let rec aux idx mean =
       match idx < Array.length arr with
