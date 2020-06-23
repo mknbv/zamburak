@@ -49,7 +49,7 @@ let () =
     (Array.map2 ( -. ) exp3ix_means exp3ix_stds)
     (Array.map2 ( +. ) exp3ix_means exp3ix_stds) ;
   Pyplot.legend
-    ~labels:[|"Linear"; "UCB"; "Exp3"; "Exp3 theoretical bound"; "Exp3-IX"|]
+    ~labels:[|"Linear"; "UCB";  "Exp3 theoretical bound"; "Exp3"; "Exp3-IX"|]
     () ;
   Pyplot.grid true ;
   Mpl.show ()
