@@ -15,5 +15,7 @@ class type alg =
 
     method pull : ?ntimes:int -> unit -> float
 
+    method regret : float
+
     method reset : unit
   end

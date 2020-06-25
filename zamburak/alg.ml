@@ -10,17 +10,19 @@ class virtual base_alg (bandit : bandit) =
     method virtual private update_stats : int -> float -> unit
 
     method pull ?(ntimes = 1) () =
-      let rec aux ntimes =
+      let rec aux ntimes total_reward =
         match ntimes with
-        | 0 -> bandit#regret
+        | 0 -> total_reward
         | _ -> (
             let arm = self#select_arm in
             match bandit#pull arm with
-            | None -> bandit#regret
+            | None -> total_reward
             | Some reward ->
                 self#update_stats arm reward ;
-                aux (ntimes - 1) ) in
-      aux ntimes
+                aux (ntimes - 1) (total_reward +. reward) ) in
+      aux ntimes 0.
+
+    method regret = bandit#regret
 
     method reset = bandit#reset
   end
