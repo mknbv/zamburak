@@ -41,8 +41,8 @@ class stock_bandit ?(investment = 1.) data_reader =
     | Some line -> line in
   let tickers = Array.of_list @@ get_tickers header in
   let narms = Array.length tickers in
-  object (self)
-    inherit Zamburak.bandit as super
+  object (self : #Zamburak.bandit)
+    val mutable total_reward = 0.
 
     val summed_rewards = Array.make narms 0.
 
@@ -75,8 +75,8 @@ class stock_bandit ?(investment = 1.) data_reader =
     method regret =
       Array.fold_left max neg_infinity summed_rewards -. total_reward
 
-    method! reset =
-      super#reset ;
+    method reset =
+      total_reward <- 0. ;
       Array.fill summed_rewards 0 (Array.length summed_rewards) 0. ;
       data_reader#reset ;
       ignore data_reader#next_data
