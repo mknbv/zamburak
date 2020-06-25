@@ -13,7 +13,7 @@ class type alg =
   object
     method narms : int
 
-    method pull : ?ntimes:int -> unit -> float
+    method pull : ?ntimes:int -> unit -> int * float
 
     method regret : float
 

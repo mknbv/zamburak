@@ -12,15 +12,16 @@ class virtual base_alg (bandit : bandit) =
     method pull ?(ntimes = 1) () =
       let rec aux ntimes total_reward =
         match ntimes with
-        | 0 -> total_reward
+        | 0 -> (ntimes, total_reward)
         | _ -> (
             let arm = self#select_arm in
             match bandit#pull arm with
-            | None -> total_reward
+            | None -> (ntimes, total_reward)
             | Some reward ->
                 self#update_stats arm reward ;
                 aux (ntimes - 1) (total_reward +. reward) ) in
-      aux ntimes 0.
+      let pulls_left, total_reward = aux ntimes 0. in
+      (ntimes - pulls_left, total_reward)
 
     method regret = bandit#regret
 
