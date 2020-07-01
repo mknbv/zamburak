@@ -88,9 +88,10 @@ class exp3 ?horizon ?learning_rate (bandit : bandit) =
         let narms = float bandit#narms in
         let horizon = float horizon in
         sqrt (2. *. log narms /. (narms *. horizon)) in
-  let learning_rate = get_learning_rate () in
   object
     inherit base_alg bandit as super
+
+    val learning_rate = get_learning_rate ()
 
     val rewards = Array.make bandit#narms 0.
 
@@ -134,11 +135,15 @@ class exp3ix ?horizon ?learning_rate ?gamma (bandit : bandit) =
           ( 2.
           *. log (float (bandit#narms + 1))
           /. float (horizon * bandit#narms) ) in
-  let learning_rate = get_learning_rate () in
-  let gamma =
-    match gamma with None -> learning_rate /. 2. | Some gamma -> gamma in
   object
     inherit base_alg bandit as super
+
+    val learning_rate = get_learning_rate ()
+
+    val gamma =
+      match gamma with
+      | None -> get_learning_rate () /. 2.
+      | Some gamma -> gamma
 
     val losses = Array.make bandit#narms 0.
 
