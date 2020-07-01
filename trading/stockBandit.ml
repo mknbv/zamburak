@@ -46,21 +46,30 @@ class stock_bandit ?(investment = 1.) data_reader =
 
     val summed_rewards = Array.make narms 0.
 
+    val payoffs = Array.make narms 0.
+
     method narms = narms
 
-    method private payoffs data =
-      let payoff ticket_index =
+    method private update_payoffs data =
+      let data = Array.of_list data in
+      let get_payoff ticket_index =
         let shares_bought =
           investment /. float_of_string data.((2 * ticket_index) + 1) in
         (shares_bought *. float_of_string data.((2 * ticket_index) + 2))
         -. investment in
-      Array.init narms payoff
+      let rec update arm =
+        match arm < narms with
+        | false -> ()
+        | true ->
+            payoffs.(arm) <- get_payoff arm ;
+            update (arm + 1) in
+      update 0
 
     method pull arm =
       match data_reader#next_data with
       | None -> None
       | Some data ->
-          let payoffs = data |> Array.of_list |> self#payoffs in
+          self#update_payoffs data ;
           let rec update_summed_rewards idx =
             match idx < Array.length summed_rewards with
             | false -> ()
@@ -71,6 +80,8 @@ class stock_bandit ?(investment = 1.) data_reader =
           let reward = payoffs.(arm) in
           total_reward <- total_reward +. reward ;
           Some reward
+
+    method payoffs = payoffs
 
     method regret =
       Array.fold_left max neg_infinity summed_rewards -. total_reward
