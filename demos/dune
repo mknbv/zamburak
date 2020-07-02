@@ -12,3 +12,8 @@
  (name exp3)
  (libraries zamburak matplotlib common)
  (modules exp3))
+
+(executable
+ (name trade)
+ (libraries zamburak matplotlib common stock)
+ (modules trade))
