@@ -7,7 +7,7 @@ module Array = struct
   let range ?(start = 0) ?(step = 1) size =
     Array.init size (fun i -> start + (i * step))
 
-  let float_mean arr =
+  let mean arr =
     let rec aux idx mean =
       match idx < Array.length arr with
       | false -> mean
@@ -17,8 +17,8 @@ module Array = struct
           aux (idx + 1) mean in
     aux 0 0.
 
-  let float_std ?mean arr =
-    let mean = match mean with None -> float_mean arr | Some mean -> mean in
+  let std arr =
+    let mean = mean arr in
     let rec aux idx std =
       match idx < Array.length arr with
       | false -> std
@@ -49,8 +49,8 @@ module Pyplot = struct
 
   let plot_mean_std ?(plot_func = `plot) ?(linewidth = 2.) ?(alpha = 0.3)
       ?label x ys =
-    let means = Array.map Array.float_mean ys in
-    let stds = Array.map Array.float_std ys in
+    let means = Array.map Array.mean ys in
+    let stds = Array.map Array.std ys in
     let plot_func =
       match plot_func with
       | `semilogy -> Pyplot.semilogy

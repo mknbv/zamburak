@@ -1,21 +1,29 @@
 open Zamburak
 open Stock
+open Common
 
-let run_alg (alg : alg) =
-  alg#reset ;
-  let _, payoff = alg#pull ~ntimes:Int.max_int () in
-  let regret = alg#regret in
-  (payoff, regret)
+let run_alg batch_size (alg : alg) =
+  let rec run idx payoffs regrets =
+    match idx < batch_size with
+    | false -> (payoffs, regrets)
+    | true ->
+        alg#reset ;
+        let _, payoff = alg#pull ~ntimes:Int.max_int () in
+        let regret = alg#regret in
+        run (idx + 1) (payoff :: payoffs) (regret :: regrets) in
+  run 0 [] []
 
-let run_print title alg =
-  let payoff, regret = run_alg alg in
+let run_print ?(batch_size = 1000) title alg =
+  let payoffs, regrets = run_alg batch_size alg in
+  let payoffs, regrets = (Array.of_list payoffs, Array.of_list regrets) in
   Printf.printf "--- %s ---\n" title ;
-  Printf.printf "Payoff: %.4f, Regret: %.4f\n" payoff regret ;
+  Printf.printf "Payoff: %.4f±%.2f, Regret: %.4f±%.2f\n" (Array.mean payoffs)
+    (Array.std payoffs) (Array.mean regrets) (Array.std regrets) ;
   print_newline ()
 
 let () =
   Random.self_init () ;
-  let reader = new csv_reader "stock/data/fortune-500.csv" in
+  let reader = new csv_reader "data/fortune-500.csv" in
   let stock_bandit = new stock_bandit reader in
   let bandit = (stock_bandit :> bandit) in
   print_newline () ;
