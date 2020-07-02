@@ -1,4 +1,6 @@
-all: zamburak install exp3 ucb
+.PHONY: all zamburak clean
+
+all: zamburak exp3 ucb trade
 
 zamburak: zamburak/
 	dune build zamburak
@@ -17,6 +19,12 @@ ucb: demos/ucb.ml zamburak/
 
 ucb.exe: demos/ucb.ml zamburak/
 	dune exec demos/ucb.exe
+
+trade: demos/trade.ml zamburak/ stock/
+	dune build demos/trade.exe
+
+trade.exe: trade
+	dune exec demos/trade.exe
 
 clean: demos/ zamburak/
 	dune clean
