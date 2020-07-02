@@ -1,0 +1,4 @@
+(library
+ (name stock)
+ (libraries zamburak)
+ (modules stock bandit alg))

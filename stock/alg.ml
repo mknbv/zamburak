@@ -1,4 +1,4 @@
-open StockBandit
+open Bandit
 open Zamburak.Utils
 
 class stock_ucb (bandit : stock_bandit) =
