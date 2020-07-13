@@ -7,7 +7,5 @@ authors: "MichaelKonobeev <konobeev.michael@gmail.com>"
 license: "MIT"
 homepage: "https://github.com/MichaelKonobeev/zamburak"
 bug-reports: "https://github.com/MichaelKonobeev/zamburak/issues"
-depends: [
-  "matplotlib" {>= "dev"}
-]
+depends: []
 build: ["dune" "build" "-p" name "-j" jobs]
