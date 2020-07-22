@@ -23,12 +23,14 @@ let run_print ?(batch_size = 1000) title alg =
 
 let () =
   Random.self_init () ;
-  let reader = new csv_reader "data/fortune-500.csv" in
-  let stock_bandit = new stock_bandit reader in
-  let bandit = (stock_bandit :> bandit) in
-  print_newline () ;
-  run_print "Random" (new random_alg bandit) ;
-  run_print "UCB" (new ucb bandit) ;
-  run_print "Stock-UCB" (new stock_ucb stock_bandit) ;
-  run_print "Exp3" (new exp3 ~horizon:1000 bandit) ;
-  run_print "Stock-Exp3" (new stock_exp3 ~horizon:1000 stock_bandit)
+  ["data/fortune-500.csv"; "data/random-stocks.csv"]
+  |> List.iter (fun filename ->
+         let reader = new csv_reader filename in
+         let stock_bandit = new stock_bandit reader in
+         let bandit = (stock_bandit :> bandit) in
+         Printf.printf "\n**** file: '%s' ****\n\n" filename ;
+         run_print "Random" (new random_alg bandit) ;
+         run_print "UCB" (new ucb bandit) ;
+         run_print "Stock-UCB" (new stock_ucb stock_bandit) ;
+         run_print "Exp3" (new exp3 ~horizon:1000 bandit) ;
+         run_print "Stock-Exp3" (new stock_exp3 ~horizon:1000 stock_bandit))

@@ -42,14 +42,27 @@ algorithm, this algorithm has linear regret on it.
 
 *k*-armed bandit algorithms and their modifications were applied
 (`make trade.exe`) to stock trading problem to buy for the duration
-of a single day $1 worth of stock of one of 9 fortune 500 companies
-from Sep 2007 to Sep 2013 using historical data. This gives the
-following results (averaged over 1000 runs):
+of a single day $1 worth of stock of one of several companies.
+The companies are either from the set of fortune 500 companies,
+or from some randomly selected set of companies. The results
+are averaged over 1000 runs and are the following.
+
+For fortune 500:
 
 |        | Random      | UCB | Stock-UCB | Exp3 | Stock-Exp3 |
 | ------ | ----------- | --- | --------- | ---- | ---------- |
 | Regret | 2.9190±0.68 | 3.7203 | 0.3138 | 2.8982±0.70 | **0.1786±0.07** |
 | Payoff | 1.1057±0.68 | 0.3044 | 3.7109 | 1.1265±0.70 | **3.8460±0.07** |
+
+For random companies:
+
+|        | Random       |   UCB   | Stock-UCB | Exp3 | Stock-Exp3 |
+| ------ | ------------ | ------- | --------- | ---- | ---------- |
+| Regret |  2.1743±1.02 |  4.3192 | **0.4174** | 2.1776±1.09 | 0.9386±0.34 |
+| Payoff | -0.2621±1.02 | -2.4070 | **1.4948** | -0.2654±1.09 | 0.9736±0.34 |
+
+
+
 
 # References
 1. [https://en.wikipedia.org/wiki/Zamburak](https://en.wikipedia.org/wiki/Zamburak)
